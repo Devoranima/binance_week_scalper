@@ -1,1 +1,8 @@
 requests
+SQLAlchemy
+sqlalchemy-utils
+python-dotenv
+python-telegram-bot
+flask
+flask_cors 
+schedule
