@@ -1,4 +1,5 @@
-from src.server import updateTradepairs, getTradepairs, switchTradepairsTrakingStatus, startRoutine
+from server.server import parse, getTradepairs, switchTradepairsTrakingStatus, startServer
+#from bot.bot import startBot
 import sys
 import argparse
 
@@ -10,9 +11,10 @@ def parseArgs():
   subparsers = parser.add_subparsers(dest="command")
 
   start = subparsers.add_parser("start", help="start specified server")
-  start.add_argument("-s", "--server_name", nargs='?', help='server name to start', choices=['updater', 'bot'])
+  start.add_argument("server_name", help='server name to start', choices=['server', 'bot'])
 
-  parse = subparsers.add_parser("parse_tradepairs", help='parse tradepairs list from binance')
+  parse = subparsers.add_parser("parse", help='parse fresh candles list from binance')
+  parse.add_argument("table", choices=["candles", "tradepairs"])
 
   update = subparsers.add_parser("update", help="update tradepairs tracking status")
   update.add_argument("tracking_status", help="tracking status to set", choices=["track", "untrack"])
@@ -21,7 +23,7 @@ def parseArgs():
 
   show = subparsers.add_parser("show", help="output stored tradepairs")
   show.add_argument("-f", "--filter", nargs="?", const="none-filter", help="filter tradepairs", choices=['tracking', 'untracking', 'none-filter'])
-
+  
   args = parser.parse_args()
 
   return args
@@ -32,13 +34,20 @@ def main():
   args = parseArgs()
   match args.command:
     case 'start':
-      startRoutine(args.server_name)
+      if args.server_name == 'bot':
+        #startBot()
+        pass
+      else:
+        startServer()
     case 'show':
+      if args.filter != None:
+        args.filter == 'tracking'
       getTradepairs(args.filter)
     case 'update':
       switchTradepairsTrakingStatus(args.tracking_status == 'track', args.tradepairs)
     case 'parse':
-      updateTradepairs()
+      parse(args.table)
+    case _:
       pass
   
   

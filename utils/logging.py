@@ -1,6 +1,9 @@
 import logging
 import os
 
+logger = logging.getLogger(__name__)
+logger.warning("Logger module depricated, abandon the ship!")
+
 
 grey = "\x1b[38;20m"
 yellow = "\x1b[33;20m"
@@ -17,10 +20,6 @@ class adaptiveFormatter(logging.Formatter):
     
     def __init__(self, fmt=None, datefmt=None, style='%', validate=True, *,
                  defaults=None):
-        #if (fmt != None):
-        #    fmt = fmt
-        #else:
-        #    fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
             
         if datefmt == None:
             datefmt = "%Y-%m-%d %H:%M"

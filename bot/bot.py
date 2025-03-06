@@ -1,9 +1,7 @@
 import os
-from dotenv import load_dotenv
-from ..utils.wrappers import singleton
-from ..utils.logging import adaptiveFormatter
-
-load_dotenv() 
+from utils.wrappers import singleton
+import requests
+import json
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 if TELEGRAM_BOT_TOKEN == None:
@@ -23,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 main_log_handler = logging.FileHandler("logs/bot.log")
 main_log_handler.setLevel(logging.INFO)
-main_log_formatter = adaptiveFormatter()
+main_log_formatter = logging.Formatter()
 main_log_handler.setFormatter(main_log_formatter)
 
 naughty_kids_handler = logging.FileHandler("logs/naughty_kids.log")
@@ -53,9 +51,13 @@ class BotController():
     
     start_handler = CommandHandler('start', start)
     self.application.add_handler(start_handler)
+    
+    self.application.add_handler(CommandHandler('tradepair', getTradepairs))
   
   def run(self):
-    asyncio.create_task(self.application.run_polling())
+    print("Bot started")
+    self.application.run_polling()
+    #asyncio.create_task(self.application.run_polling())
   
   def sendUpdate(self, data):
     raise NotImplementedError("BotCntroller().sendUpdate is not implemented")
@@ -65,11 +67,31 @@ async def authorizationHandle(update: Update, context: ContextTypes.DEFAULT_TYPE
   if update.effective_user.id in SPECIAL_USERS:
     pass
   else:
-    #await update.effective_message.reply_text("Hey! You are not allowed to use me!")
     logger.warning("Unathorized request from: %s"%update.effective_chat.id)
     
     raise ApplicationHandlerStop  
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-  await context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, please talk to me!")
+  await context.bot.send_message(chat_id=update.effective_chat.id, text="I will do everything for you!")
 
+async def getTradepairs(update: Update, context: ContextTypes.DEFAULT_TYPE):
+  response = requests.get("http://localhost:5000/tradepairs")
+  tradepairs = json.loads(response.content)['tradepairs']
+  tracking = list(filter(lambda x: x['tracking'], tradepairs))
+  
+  msg = """
+  %d tradepairs loaded
+  %d tracking
+  %d untracking
+  """ % (len(tradepairs), len(tracking), len(tradepairs) - len(tracking))
+  
+  await context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
+  
+
+from flask import Flask, jsonify, request, Response
+
+app = Flask(__name__)
+
+@app.route("/newSwing", methods = ['POST'])
+def send_new_swing(swing):
+  pass
