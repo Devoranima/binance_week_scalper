@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
-from .models import Base
+from updater.db.models import Base
 import os
 
 from dotenv import load_dotenv

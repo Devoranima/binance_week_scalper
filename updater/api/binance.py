@@ -1,6 +1,5 @@
 import requests
 import time
-from typing import List
 import json
 import logging
 from datetime import datetime
@@ -72,7 +71,7 @@ def getTradepairs() -> list[str]:
 
 def parseCandleFromResponse(array, symbol):
     candle = dict()
-    candle["timeframe"] = '1w'
+    candle["timeframe_name"] = '1w'
     candle["datetime_open"] = datetime.fromtimestamp(float(array[0])/1000)
     candle["datetime_close"] = datetime.fromtimestamp(float(array[6])/1000)
     candle["open"] = float(array[1])
@@ -104,14 +103,13 @@ def requestTradepairCandles(symbol: str, limit: int = 5, interval: str = '1w') -
 def getCandles(tradepairs: list[str])->list[dict]:
     candles = list()
 
-    #tradepairs = tradepairs[:11]
     for tradepair_name in tradepairs:
         logger.info("Loading cabdles for %s"%tradepair_name)
         loaded = False
         while loaded == False:
             try:
                 tradepair_candles = requestTradepairCandles(symbol=tradepair_name)
-                candles.append(tradepair_candles)
+                candles += tradepair_candles
                 loaded = True
             except ApiOverflowError as err:
                 logger.warning("Api overflown, waiting %d seconds"%err.timeout)
@@ -122,29 +120,6 @@ def getCandles(tradepairs: list[str])->list[dict]:
                 raise RuntimeError(e)
                 
     return candles
-
-#? silly billy
-def gCandles(tradepairs: list[str]):
-    loaded_candles = list()
-    for tradepair in tradepairs:
-        loaded = False
-        while loaded == False:
-            try:
-                candles = requestTradepairCandles(pair=tradepair)
-                for candle in candles:
-                    candle['tradepair_name'] = tradepair
-                    loaded_candles.append(candle)
-                loaded = True
-                yield candles
-            except ApiOverflowError as err:
-                logger.warning("Api overflown, waiting %d seconds"%err.timeout)
-                    #? make it with logger
-                time.sleep(err.timeout)
-            except Exception as e:
-                logger.critical(e)
-                raise RuntimeError(e)
-    return loaded_candles
-
 
 def getTradepairCandles(symbol: str):
     loaded = False

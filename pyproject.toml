@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools >= 61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "overseer"
+version = "1.0.0"
+dependencies = [
+  "requests",
+  "SQLAlchemy",
+  "sqlalchemy-utils",
+  "python-dotenv",
+  "python-telegram-bot",
+  "flask",
+  "flask_cors", 
+  "schedule",
+  "alembic",
+  "pytz",
+]
+requires-python = ">= 3.8"
+readme = "README.md"
+[project.scripts]
+start = "manager:main"
+
+[tool.yapf]
+blank_line_before_nested_class_or_def = true
+column_limit = 88
